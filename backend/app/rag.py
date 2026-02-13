@@ -16,6 +16,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_pinecone import PineconeVectorStore
 from pinecone import Pinecone
 
+from app.llm import get_llm
+
 
 load_dotenv()  # Loads OPENAI_API_KEY from .env
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -275,7 +277,7 @@ class RAGDocumentUploader:
 
         """Build a simple RAG chain using the retriever and an LLM."""
         retriever = self.get_retriever(retriever_type=retriever_type, weights=weights)
-        llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, temperature=0)
+        llm = get_llm()
         prompt_template = PromptTemplate(
             input_variables=["context", "question"],
             template=PROMPT_TEMPLATE,
@@ -285,6 +287,7 @@ class RAGDocumentUploader:
             | prompt_template
             | llm
         )
+
 
 uploader = RAGDocumentUploader()
 

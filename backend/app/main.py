@@ -9,10 +9,7 @@ from app.rag import uploader
 load_dotenv()
 
 
-app = FastAPI(
-    title="Agentic AI Backend",
-    version="1.0"
-)
+app = FastAPI(title="Agentic AI Backend", version="1.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,6 +24,7 @@ rag_chain = uploader.get_rag_chain()
 
 add_routes(app, agent, path="/agent")
 add_routes(app, rag_chain, path="/rag")
+
 
 @app.get("/")
 def root():
