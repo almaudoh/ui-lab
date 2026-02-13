@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Speech Recognition Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .control-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      flex: 1;
+      padding: 12px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button.stop {
+      background: #dc3545;
+    }
+
+    button.stop:hover {
+      background: #c82333;
+    }
+
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .status {
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .status.listening {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status.processing {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .result-section {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      min-height: 80px;
+    }
+
+    .result-label {
+      font-weight: bold;
+      color: #555;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .transcript {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 10px;
+      padding: 10px;
+      background: white;
+      border-left: 4px solid #007bff;
+    }
+
+    .interim {
+      color: #999;
+      font-style: italic;
+    }
+
+    .confidence {
+      font-size: 14px;
+      color: #666;
+      margin-top: 10px;
+    }
+
+    .confidence-bar {
+      width: 100%;
+      height: 6px;
+      background: #ddd;
+      border-radius: 3px;
+      margin-top: 5px;
+      overflow: hidden;
+    }
+
+    .confidence-bar-fill {
+      height: 100%;
+      background: #28a745;
+      transition: width 0.3s;
+    }
+
+    .results-list {
+      max-height: 300px;
+      overflow-y: auto;
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    .result-item {
+      padding: 10px;
+      margin-bottom: 8px;
+      background: #f0f0f0;
+      border-radius: 3px;
+      border-left: 3px solid #007bff;
+    }
+
+    .result-item.final {
+      border-left-color: #28a745;
+      background: #f0fff0;
+    }
+
+    .result-time {
+      font-size: 12px;
+      color: #999;
+      margin-top: 5px;
+    }
+
+    .info {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e7f3ff;
+      border-left: 4px solid #007bff;
+      font-size: 14px;
+      color: #555;
+      border-radius: 3px;
+    }
+
+    .info strong {
+      color: #004085;
+    }
+
+    .features {
+      margin-top: 10px;
+      font-size: 13px;
+    }
+
+    .features li {
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>🎤 Speech Recognition Demo</h1>
+
+    <div class="control-group">
+      <label for="langSelect">Language:</label>
+      <select id="langSelect">
+        <option value="en-US">English (US)</option>
+        <option value="en-GB">English (UK)</option>
+        <option value="es-ES">Spanish (Spain)</option>
+        <option value="es-MX">Spanish (Mexico)</option>
+        <option value="fr-FR">French</option>
+        <option value="de-DE">German</option>
+        <option value="it-IT">Italian</option>
+        <option value="ja-JP">Japanese</option>
+        <option value="zh-CN">Chinese (Simplified)</option>
+        <option value="zh-TW">Chinese (Traditional)</option>
+        <option value="ko-KR">Korean</option>
+        <option value="pt-BR">Portuguese (Brazil)</option>
+        <option value="ru-RU">Russian</option>
+        <option value="ar-SA">Arabic</option>
+        <option value="hi-IN">Hindi</option>
+      </select>
+    </div>
+
+    <div id="status" class="status" style="display: none;"></div>
+
+    <div class="button-group">
+      <button id="startButton">🎙️ Start Listening</button>
+      <button id="stopButton" class="stop" disabled>⏹️ Stop</button>
+      <button id="clearButton">🗑️ Clear</button>
+    </div>
+
+    <div class="result-section">
+      <div class="result-label">Current Transcript</div>
+      <div class="transcript">
+        <span id="final">Ready to listen...</span>
+        <span id="interim" class="interim"></span>
+      </div>
+      <div class="confidence">
+        <span>Confidence: <span id="confidencePercent">0</span>%</span>
+        <div class="confidence-bar">
+          <div class="confidence-bar-fill" id="confidenceBar"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-section">
+      <div class="result-label">All Recognized Phrases</div>
+      <div class="results-list" id="resultsList">
+        <p style="color: #999;">No results yet. Start listening to see recognized phrases.</p>
+      </div>
+    </div>
+
+    <div class="info">
+      <strong>How to use:</strong>
+      <ul class="features">
+        <li>Select your language from the dropdown</li>
+        <li>Click "Start Listening" and speak into your microphone</li>
+        <li>The demo will recognize your speech in real-time</li>
+        <li>Interim results appear in gray (still being processed)</li>
+        <li>Final results are confirmed and added to the history</li>
+        <li>Check the confidence score to see how certain the recognition is</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // Check browser support
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert('Speech Recognition API is not supported in this browser. Please try Chrome, Edge, or Safari.');
+    }
+
+    const recognition = new SpeechRecognition();
+    let isListening = false;
+    let resultsList = [];
+
+    // Configuration
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    // DOM elements
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
+    const clearButton = document.getElementById('clearButton');
+    const langSelect = document.getElementById('langSelect');
+    const statusEl = document.getElementById('status');
+    const finalTranscript = document.getElementById('final');
+    const interimTranscript = document.getElementById('interim');
+    const confidencePercent = document.getElementById('confidencePercent');
+    const confidenceBar = document.getElementById('confidenceBar');
+    const resultsListEl = document.getElementById('resultsList');
+
+    // Set initial language
+    recognition.lang = langSelect.value;
+
+    // Language change
+    langSelect.addEventListener('change', (e) => {
+      recognition.lang = e.target.value;
+    });
+
+    // Start listening
+    startButton.addEventListener('click', () => {
+      isListening = true;
+      resultsList = [];
+      resultsListEl.innerHTML = '';
+      finalTranscript.textContent = '';
+      interimTranscript.textContent = '';
+      confidencePercent.textContent = '0';
+      confidenceBar.style.width = '0%';
+
+      startButton.disabled = true;
+      stopButton.disabled = false;
+      langSelect.disabled = true;
+
+      showStatus('Listening...', 'listening');
+
+      recognition.start();
+    });
+
+    // Stop listening
+    stopButton.addEventListener('click', () => {
+      isListening = false;
+      startButton.disabled = false;
+      stopButton.disabled = true;
+      langSelect.disabled = false;
+
+      hideStatus();
+      recognition.stop();
+    });
+
+    // Clear results
+    clearButton.addEventListener('click', () => {
+      finalTranscript.textContent = 'Ready to listen...';
+      interimTranscript.textContent = '';
+      confidencePercent.textContent = '0';
+      confidenceBar.style.width = '0%';
+      resultsList = [];
+      resultsListEl.innerHTML = '<p style="color: #999;">No results yet. Start listening to see recognized phrases.</p>';
+    });
+
+    // Handle results
+    recognition.onresult = (event) => {
+      let interim = '';
+      let isFinal = false;
+      let confidence = 0;
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        confidence = event.results[i][0].confidence;
+
+        if (event.results[i].isFinal) {
+          isFinal = true;
+          finalTranscript.textContent = transcript;
+          interimTranscript.textContent = '';
+
+          // Add to results list
+          const now = new Date();
+          const timeStr = now.toLocaleTimeString();
+          resultsList.push({
+            transcript: transcript,
+            confidence: confidence,
+            time: timeStr,
+            isFinal: true
+          });
+
+          updateResultsList();
+        } else {
+          interim += transcript + ' ';
+        }
+      }
+
+      // Update confidence display
+      confidence = Math.round(confidence * 100);
+      confidencePercent.textContent = confidence;
+      confidenceBar.style.width = confidence + '%';
+
+      // Update interim results
+      if (interim) {
+        interimTranscript.textContent = interim;
+      }
+
+      showStatus(isFinal ? 'Recognized!' : 'Listening...', isFinal ? 'processing' : 'listening');
+    };
+
+    // Handle errors
+    recognition.onerror = (event) => {
+      let errorMessage = 'Error: ';
+      switch (event.error) {
+        case 'network':
+          errorMessage += 'Network error. Please check your connection.';
+          break;
+        case 'audio':
+          errorMessage += 'Audio capture error. Check your microphone.';
+          break;
+        case 'not-allowed':
+          errorMessage += 'Microphone access denied. Please grant permission.';
+          break;
+        case 'no-speech':
+          errorMessage += 'No speech detected. Please try again.';
+          break;
+        default:
+          errorMessage += event.error;
+      }
+
+      showStatus(errorMessage, 'error');
+      startButton.disabled = false;
+      stopButton.disabled = true;
+      langSelect.disabled = false;
+      isListening = false;
+    };
+
+    // Handle end of recognition
+    recognition.onend = () => {
+      if (isListening) {
+        recognition.start();
+      } else {
+        hideStatus();
+      }
+    };
+
+    function showStatus(message, type) {
+      statusEl.textContent = message;
+      statusEl.className = 'status ' + type;
+      statusEl.style.display = 'block';
+    }
+
+    function hideStatus() {
+      statusEl.style.display = 'none';
+    }
+
+    function updateResultsList() {
+      if (resultsList.length === 0) {
+        resultsListEl.innerHTML = '<p style="color: #999;">No results yet. Start listening to see recognized phrases.</p>';
+        return;
+      }
+
+      resultsListEl.innerHTML = resultsList.map((result, index) => `
+        <div class="result-item ${result.isFinal ? 'final' : ''}">
+          <strong>#${resultsList.length - index}</strong> ${result.transcript}
+          <div class="confidence">Confidence: ${Math.round(result.confidence * 100)}%</div>
+          <div class="result-time">${result.time}</div>
+        </div>
+      `).join('');
+
+      // Scroll to bottom
+      resultsListEl.scrollTop = resultsListEl.scrollHeight;
+    }
+  </script>
+</body>
+
+</html>
