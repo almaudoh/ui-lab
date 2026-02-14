@@ -141,6 +141,20 @@ function getTableCellText(cell: unknown, mathMap: Record<string, string>): strin
   return normalizeInlineText(String(cell || ''), mathMap);
 }
 
+function getNumericOrdinal(n: number): string {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return `${n}${s[(v - 20) % 10] || s[v] || s[0]}`;
+}
+
+function getOrdinal(n: number): string {
+  const ordinals = [
+    'first', 'second', 'third', 'fourth', 'fifth',
+    'sixth', 'seventh', 'eighth', 'ninth', 'tenth'
+  ];
+  return ordinals[n] || `${getNumericOrdinal(n + 1)}`;
+}
+
 function tokensToSpeech(tokens: Array<Record<string, any>>, mathMap: Record<string, string>): string[] {
   const lines: string[] = [];
 
@@ -196,19 +210,26 @@ function tokensToSpeech(tokens: Array<Record<string, any>>, mathMap: Record<stri
         break;
       }
       case 'table': {
+        lines.push('')
         lines.push('Table.');
+        lines.push('');
         const headers = (token.header || [])
-          .map((cell: unknown) => getTableCellText(cell, mathMap))
-          .filter(Boolean);
+          .map((cell: unknown) => getTableCellText(cell, mathMap));
+
         if (headers.length) {
-          lines.push(finalizeSentence(`Headers: ${headers.join(', ')}`));
+          (token.rows || []).forEach((row: unknown[], rowIndex: number) => {
+            const cells = row.map((cell) => getTableCellText(cell, mathMap)).filter(Boolean);
+            if (cells.length) {
+              lines.push(`${getOrdinal(rowIndex)} entry:`);
+              cells.forEach((cellText, cellIndex) => {
+                const header = headers[cellIndex];
+                const cellDescription = header ? `${header} ${cellText}` : cellText;
+                lines.push(finalizeSentence(cellDescription));
+              });
+              lines.push('');
+            }
+          });
         }
-        (token.rows || []).forEach((row: unknown[], rowIndex: number) => {
-          const cells = row.map((cell) => getTableCellText(cell, mathMap)).filter(Boolean);
-          if (cells.length) {
-            lines.push(finalizeSentence(`Row ${rowIndex + 1}: ${cells.join(', ')}`));
-          }
-        });
         break;
       }
       case 'code': {
