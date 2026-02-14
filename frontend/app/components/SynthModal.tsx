@@ -8,7 +8,7 @@ import LanguageSelector from './synth/LanguageSelector';
 import AudioControls from './synth/AudioControls';
 import SpeakButton from './synth/SpeakButton';
 import InfoBox from './synth/InfoBox';
-import { useSynthSettings } from '../context';
+import { useSynthSettings } from '../context/settings';
 
 interface SynthModalProps {
   onClose: () => void;
@@ -85,7 +85,7 @@ export function SynthModal({ onClose }: SynthModalProps) {
     volume !== savedSettings.volume;
 
   return (
-    <div className="bg-white rounded-lg p-6 max-h-[80vh] overflow-y-auto">
+    <div className="bg-white rounded-lg p-6">
       <h2 className="text-3xl font-bold text-gray-800 mb-6">🗣️ Speech Synthesis</h2>
 
       <TextInput value={text} onChange={setText} onSpeak={handleSpeak} />

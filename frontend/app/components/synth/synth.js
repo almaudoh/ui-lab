@@ -2,18 +2,20 @@ const saySomething = (something, options = {}) => {
   const utterance = new SpeechSynthesisUtterance(something);
   
   // Set pitch (0 to 2, default 1)
-  utterance.pitch = options.pitch || 1;
+  utterance.pitch = options.pitch ?? 1;
   
   // Set rate/speed (0.1 to 10, default 1)
-  utterance.rate = options.rate || 1;
+  utterance.rate = options.rate ?? 1;
   
   // Set volume (0 to 1, default 1)
-  utterance.volume = options.volume || 1;
+  utterance.volume = options.volume ?? 1;
   
   // Select a specific voice (if provided, use the voice's natural language)
   if (options.voiceName) {
     const voices = speechSynthesis.getVoices();
-    const selectedVoice = voices.find(voice => voice.name === options.voiceName);
+    const selectedVoice = voices.find(
+      (voice) => voice.name === options.voiceName || voice.voiceURI === options.voiceName
+    );
     if (selectedVoice) {
       utterance.voice = selectedVoice;
       // Use the voice's native language for best quality
@@ -27,7 +29,20 @@ const saySomething = (something, options = {}) => {
     utterance.lang = options.lang || 'en-US';
   }
   
+  if (typeof options.onEnd === 'function') {
+    utterance.onend = options.onEnd;
+  }
+
+  if (typeof options.onError === 'function') {
+    utterance.onerror = options.onError;
+  }
+
+  if (typeof options.onBoundary === 'function') {
+    utterance.onboundary = options.onBoundary;
+  }
+
   speechSynthesis.speak(utterance);
+  return utterance;
 };
 
 // Get available voices

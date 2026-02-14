@@ -1,6 +1,6 @@
 import { Config } from './types';
 
-export const defaultConfig: Config = {
-  backendUrl: 'http://localhost:8000',
-  endpoint: '/agent/stream',
+export const config: Config = {
+  backendUrl: process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000',
+  endpoint: '/agent/invoke',
 };

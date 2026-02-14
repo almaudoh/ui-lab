@@ -74,6 +74,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     gap: '8px',
     animation: 'slideIn 0.3s ease-out',
+    alignItems: 'flex-start',
   },
   messageUser: {
     justifyContent: 'flex-end',
@@ -91,10 +92,25 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: 'white',
     borderBottomRightRadius: '4px',
   },
-  messageContentAssistant: {
+  messageContentAi: {
     background: '#e9ecef',
     color: '#222',
     borderBottomLeftRadius: '4px',
+  },
+  messageContentSystem: {
+    background: '#e0f2fe',
+    color: '#0c4a6e',
+    borderBottomLeftRadius: '4px',
+    fontSize: '12px',
+  },
+  messageContentUi: {
+    background: '#f1f5f9',
+    color: '#334155',
+    borderBottomLeftRadius: '4px',
+    fontSize: '12px',
+    alignSelf: 'center',
+    maxWidth: '90%',
+    textAlign: 'center',
   },
   messageContentError: {
     background: '#fff3cd',
@@ -104,6 +120,34 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignSelf: 'center',
     maxWidth: '90%',
     textAlign: 'center',
+  },
+  speakControls: {
+    display: 'flex',
+    gap: '6px',
+  },
+  speakButton: {
+    width: '32px',
+    height: '32px',
+    borderRadius: '50%',
+    border: '1px solid #d0d7de',
+    background: 'white',
+    color: '#4b5563',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    padding: 0,
+    lineHeight: 1,
+  },
+  speakButtonPause: {
+    color: '#9333ea',
+    borderColor: '#e9d5ff',
+  },
+  speakButtonDim: {
+    opacity: 0.6,
+  },
+  speakButtonActive: {
+    boxShadow: '0 0 0 3px rgba(147, 51, 234, 0.2)',
   },
   inputSection: {
     padding: '20px',

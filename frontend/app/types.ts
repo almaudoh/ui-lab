@@ -1,10 +1,11 @@
 // Types
-export type LangChainMessageType = 'human' | 'ai' | 'system';
+export type AgentMessageType = 'human' | 'ai' | 'system';
+export type AppMessageType = AgentMessageType | 'ui' | 'error';
 
 export interface Message {
   id: number;
   content: string;
-  type: LangChainMessageType;
+  type: AppMessageType;
 }
 
 export interface Config {

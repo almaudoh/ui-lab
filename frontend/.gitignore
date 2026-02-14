@@ -42,3 +42,4 @@ next-env.d.ts
 
 # lock files
 pnpm-lock.yaml
+.DS_Store

@@ -165,7 +165,7 @@ export function RecogModal({ onClose }: RecogModalProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg p-6 max-h-[80vh] overflow-y-auto">
+    <div className="bg-white rounded-lg p-6">
       <h2 className="text-3xl font-bold text-gray-800 mb-5">
         🎤 Speech Recognition
       </h2>
