@@ -2,7 +2,7 @@
 
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import saySomething from '../components/synth/synth';
-import { stripMarkdown } from './markdown';
+import { markdownToSpeechText } from './markdown';
 import { SynthSettings } from '../context/settings';
 
 export interface PlaybackState {
@@ -132,7 +132,9 @@ export async function speakTextWithControls(
   }
 
   const rawText = typeof text === 'string' ? text : String(text || '');
-  const textToSpeak = stripMarkdown(rawText);
+  const textToSpeak = markdownToSpeechText(rawText);
+
+  console.log('[speech] textToSpeak', textToSpeak);
 
   if (!textToSpeak.trim()) {
     callbacks.onEnd?.();
