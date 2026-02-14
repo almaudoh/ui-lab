@@ -15,7 +15,6 @@ import styles from './components/styles';
 // Main Page Component
 export default function Page() {
   const [activeModal, setActiveModal] = useState<'synth' | 'recog' | null>(null);
-  const { savedSettings } = useSynthSettings();
   const { messages, isSending, status, handleSendMessage, handleClearMessages, showStatus } = useMessages();
 
   useEffect(() => {

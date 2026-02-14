@@ -14,7 +14,7 @@ interface MessageContextValue {
   messages: Message[];
   isSending: boolean;
   status: StatusType;
-  handleSendMessage: (message: string, synthSettings: SynthSettings) => Promise<void>;
+  handleSendMessage: (message: string) => Promise<void>;
   handleClearMessages: () => void;
   showStatus: (message: string, type?: 'info' | 'success' | 'error') => void;
 }
