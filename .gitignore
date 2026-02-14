@@ -1,0 +1,7 @@
+# Ignore all files in this folder by default
+/*
+
+# But allow these specific files/folders
+!.gitignore
+!frontend/
+!backend/
