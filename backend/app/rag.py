@@ -184,7 +184,7 @@ class RAGDocumentUploader:
             print("⚠ No documents for BM25 retriever. Please add documents first.")
             return
 
-        self.bm25_retriever = BM25Retriever(docs=self.all_documents)
+        self.bm25_retriever = BM25Retriever.from_documents(self.all_documents)
         print(f"✓ BM25 retriever built with {len(self.all_documents)} documents")
 
     def upload_and_index(self, file_path: str) -> List[Document]:
@@ -203,7 +203,9 @@ class RAGDocumentUploader:
         self.build_bm25_retriever()
         return documents
 
-    def upload_batch(self, file_paths: List[str], base_path: Union[str, Path] = None) -> int:
+    def upload_batch(
+        self, file_paths: List[str], base_path: Union[str, Path] = None
+    ) -> int:
         """
         Upload and index multiple documents at once.
 
