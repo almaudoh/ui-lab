@@ -7,14 +7,17 @@ import { MessageComponent } from './Message';
 
 export function MessageList({ messages }: { messages: Message[] }) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [speakingMessageId, setSpeakingMessageId] = useState<number | null>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   }, [messages]);
 
   return (
-    <div style={styles.messages}>
+    <div ref={messagesContainerRef} style={styles.messages}>
       {messages.map((message) => (
         <MessageComponent
           key={message.id}

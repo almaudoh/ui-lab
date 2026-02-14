@@ -223,7 +223,7 @@ function tokensToSpeech(tokens: Array<Record<string, any>>, mathMap: Record<stri
               lines.push(`${getOrdinal(rowIndex)} entry:`);
               cells.forEach((cellText, cellIndex) => {
                 const header = headers[cellIndex];
-                const cellDescription = header ? `${header} ${cellText}` : cellText;
+                const cellDescription = header ? `${header}: ${cellText}` : cellText;
                 lines.push(finalizeSentence(cellDescription));
               });
               lines.push('');
