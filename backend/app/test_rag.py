@@ -40,7 +40,7 @@ def main():
 
     # Get document summary
     summary = uploader.get_document_summary()
-    print(f"\nDocument Summary:")
+    print("\nDocument Summary:")
     for key, value in summary.items():
         print(f"  {key}: {value}")
 
@@ -50,7 +50,7 @@ def main():
     chain = uploader.get_rag_chain()
 
     # 7. Execute the chain
-    print(f"\n=== Query ===")
+    print("\n=== Query ===")
     print(f"Q: {user_query}\n")
     answer = chain.invoke(user_query)
     print("--- Hybrid RAG Answer ---\n", answer.content)

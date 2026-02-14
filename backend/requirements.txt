@@ -26,3 +26,4 @@ chromadb
 PyPDF2
 pypdf
 rank_bm25
+ruff

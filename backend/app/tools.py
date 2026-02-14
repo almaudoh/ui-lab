@@ -1,6 +1,7 @@
 from app.rag import uploader
 from langchain.tools import tool
 
+
 @tool
 def calculator(expression: str):
     """Evaluate mathematical expressions"""
@@ -9,6 +10,7 @@ def calculator(expression: str):
         return str(eval(expression))  # Very bad!!! No guardrails.
     except Exception as e:
         return f"Error: {e}"
+
 
 @tool
 def search_notes(query: str):

@@ -4,7 +4,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from langchain_classic.retrievers import EnsembleRetriever
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_openai import OpenAIEmbeddings
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.documents import Document
 from langchain_core.prompts import PromptTemplate
