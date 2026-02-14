@@ -9,10 +9,14 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@langchain/classic": "^1.0.17",
+    "@langchain/textsplitters": "^1.0.1",
+    "marked": "^17.0.2",
     "next": "16.1.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "remove-markdown": "^0.6.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

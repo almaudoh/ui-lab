@@ -3,21 +3,28 @@
 import styles from './styles';
 import { Message } from '../types';
 import { SpeakControls } from './SpeakControls';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
-export function MessageComponent({ message }: { message: Message }) {
+export function MessageComponent({
+  message,
+  isSpeaking = false,
+  onSpeakStart,
+  onSpeakEnd,
+}: {
+  message: Message;
+  isSpeaking?: boolean;
+  onSpeakStart?: (messageId: number) => void;
+  onSpeakEnd?: () => void;
+}) {
   const isUser = message.type === 'human';
   const isAi = message.type === 'ai';
   const isSystem = message.type === 'system';
   const isUi = message.type === 'ui';
   const isError = message.type === 'error';
 
-  const formatContent = (content: unknown) => {
-    // Ensure content is a string
-    const contentStr = typeof content === 'string' ? content : String(content || '');
-    return contentStr
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/\n/g, '<br>');
+  const getContent = () => {
+    return typeof message.content === 'string' ? message.content : String(message.content || '');
   };
 
   const messageStyle = {
@@ -36,11 +43,20 @@ export function MessageComponent({ message }: { message: Message }) {
 
   return (
     <div style={messageStyle}>
-      <div
-        style={contentStyle}
-        dangerouslySetInnerHTML={{ __html: formatContent(message.content) }}
-      />
-      {isAi && <SpeakControls text={message.content} />}
+      <div style={contentStyle}>
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          {getContent()}
+        </ReactMarkdown>
+      </div>
+      {isAi && (
+        <SpeakControls
+          text={message.content}
+          autoPlay={message.autoPlay}
+          isSpeaking={isSpeaking}
+          onSpeakStart={() => onSpeakStart?.(message.id)}
+          onSpeakEnd={onSpeakEnd}
+        />
+      )}
     </div>
   );
 }

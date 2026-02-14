@@ -6,6 +6,7 @@ export interface Message {
   id: number;
   content: string;
   type: AppMessageType;
+  autoPlay?: boolean;
 }
 
 export interface Config {

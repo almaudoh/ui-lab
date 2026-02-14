@@ -31,7 +31,7 @@ export default function Page() {
         />
         <MessageList messages={messages} />
         <ChatInput 
-          onSend={(msg) => handleSendMessage(msg, savedSettings)} 
+          onSend={(msg) => handleSendMessage(msg)} 
           onClear={handleClearMessages} 
           disabled={isSending} 
         />

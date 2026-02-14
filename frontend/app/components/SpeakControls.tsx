@@ -1,89 +1,73 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import styles from './styles';
-import saySomething from './synth/synth.js';
 import { useSynthSettings } from '../context/settings';
+import { speakTextWithControls, pauseSpeech, resumePlayback, PlaybackState, SpeechSynthesisCallbacks } from '../utils/speechSynthesis';
 
 type SpeakControlsProps = {
   text: unknown;
+  autoPlay?: boolean;
+  isSpeaking?: boolean;
+  onSpeakStart?: () => void;
+  onSpeakEnd?: () => void;
 };
 
-export function SpeakControls({ text }: SpeakControlsProps) {
+export function SpeakControls({ text, autoPlay = false, isSpeaking: isExternallySpeaking = false, onSpeakStart, onSpeakEnd }: SpeakControlsProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const activeTextRef = useRef('');
-  const baseIndexRef = useRef(0);
-  const lastBoundaryIndexRef = useRef(0);
-  const utteranceIdRef = useRef(0);
-  const isManualPauseRef = useRef(false);
+  const playbackRef = useRef<PlaybackState>({
+    isPaused: false,
+    chunks: [] as string[],
+    chunkIndex: 0,
+    chunkOffset: 0,
+    lastBoundaryOffset: 0,
+    utteranceId: 0,
+    isManualPause: false,
+  });
+  const autoPlayRef = useRef(false);
   const { savedSettings } = useSynthSettings();
-
-  const textToSpeak = useMemo(() => {
-    return typeof text === 'string' ? text : String(text || '');
-  }, [text]);
 
   const canSpeak = typeof window !== 'undefined' && 'speechSynthesis' in window;
 
-  const startSpeech = (fullText: string, startIndex = 0) => {
-    if (!canSpeak || !fullText.trim()) {
-      return;
-    }
-
-    const utteranceId = utteranceIdRef.current + 1;
-    utteranceIdRef.current = utteranceId;
-    isManualPauseRef.current = false;
-    activeTextRef.current = fullText;
-    baseIndexRef.current = startIndex;
-    lastBoundaryIndexRef.current = startIndex;
-
-    window.speechSynthesis.cancel();
-    setIsSpeaking(true);
-    setIsPaused(false);
-
-    saySomething(fullText.slice(startIndex), {
-      voiceName: savedSettings.selectedVoice,
-      lang: savedSettings.language,
-      pitch: savedSettings.pitch,
-      rate: savedSettings.rate,
-      volume: savedSettings.volume,
-      onBoundary: (event: SpeechSynthesisEvent) => {
-        if (utteranceIdRef.current !== utteranceId) {
-          return;
-        }
-
-        if (typeof event.charIndex === 'number') {
-          lastBoundaryIndexRef.current = baseIndexRef.current + event.charIndex;
-        }
+  const callbacks = useMemo<SpeechSynthesisCallbacks>(
+    () => ({
+      onStart: () => {
+        setIsSpeaking(true);
+        setIsPaused(false);
+        onSpeakStart?.();
       },
       onEnd: () => {
-        if (utteranceIdRef.current !== utteranceId) {
-          return;
-        }
-
-        if (isManualPauseRef.current) {
-          isManualPauseRef.current = false;
-          return;
-        }
-
         setIsSpeaking(false);
         setIsPaused(false);
+        onSpeakEnd?.();
       },
       onError: () => {
-        if (utteranceIdRef.current !== utteranceId) {
-          return;
-        }
-
-        isManualPauseRef.current = false;
         setIsSpeaking(false);
         setIsPaused(false);
+        onSpeakEnd?.();
       },
-    });
+      onPause: () => {
+        setIsPaused(true);
+      },
+      onResume: () => {
+        setIsSpeaking(true);
+        setIsPaused(false);
+      },
+    }),
+    [onSpeakStart, onSpeakEnd]
+  );
 
-  };
+  // Auto-play on mount if enabled
+  useEffect(() => {
+    if (autoPlay && !autoPlayRef.current && canSpeak) {
+      autoPlayRef.current = true;
+      speakTextWithControls(text, savedSettings, callbacks, playbackRef.current);
+    }
+  }, [autoPlay, canSpeak, text, savedSettings, callbacks]);
 
-  const handleSpeak = () => {
-    startSpeech(textToSpeak, 0);
+  const handleSpeak = async () => {
+    await speakTextWithControls(text, savedSettings, callbacks, playbackRef.current);
   };
 
   const handlePauseResume = () => {
@@ -92,22 +76,27 @@ export function SpeakControls({ text }: SpeakControlsProps) {
     }
 
     if (isPaused) {
-      const resumeText = activeTextRef.current || textToSpeak;
-      const resumeIndex = Math.min(lastBoundaryIndexRef.current, resumeText.length);
-      startSpeech(resumeText, resumeIndex);
+      // Resume playback - onResume callback will update state
+      resumePlayback(playbackRef.current, savedSettings, callbacks);
       return;
     }
 
-    isManualPauseRef.current = true;
+    pauseSpeech(playbackRef.current);
     setIsPaused(true);
-    window.speechSynthesis.cancel();
   };
 
   return (
     <div style={styles.speakControls}>
       <button
         type="button"
-        style={{ ...styles.speakButton, ...(isPaused ? styles.speakButtonDim : {}) }}
+        style={{
+          ...styles.speakButton,
+          ...(isPaused ? styles.speakButtonDim : {}),
+          ...(isExternallySpeaking ? {
+            boxShadow: '0 0 12px rgba(239, 68, 68, 0.6)',
+            borderColor: 'rgba(239, 68, 68, 0.4)',
+          } : {}),
+        }}
         onClick={handleSpeak}
         aria-label="Speak this message"
         title={canSpeak ? 'Speak this message' : 'Speech not supported'}
@@ -131,7 +120,10 @@ export function SpeakControls({ text }: SpeakControlsProps) {
         style={{
           ...styles.speakButton,
           ...styles.speakButtonPause,
-          ...(isPaused ? styles.speakButtonActive : {}),
+          ...(isPaused ? {
+            boxShadow: '0 0 12px rgba(251, 146, 60, 0.6)',
+            borderColor: 'rgba(251, 146, 60, 0.4)',
+          } : {}),
         }}
         onClick={handlePauseResume}
         aria-label={isPaused ? 'Resume speaking' : 'Pause speaking'}

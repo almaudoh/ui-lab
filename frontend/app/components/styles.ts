@@ -74,7 +74,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     gap: '8px',
     animation: 'slideIn 0.3s ease-out',
-    alignItems: 'flex-start',
+    alignItems: 'flex-end',
   },
   messageUser: {
     justifyContent: 'flex-end',
@@ -124,6 +124,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   speakControls: {
     display: 'flex',
     gap: '6px',
+    alignSelf: 'flex-end',
   },
   speakButton: {
     width: '32px',

@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useRef, useCallback, useMemo } from 'react';
 import { Message, AgentMessageType, AppMessageType } from '../types';
-import saySomething from '../components/synth/synth';
+
 import { SynthSettings } from './settings';
 
 interface StatusType {
@@ -37,11 +37,12 @@ export function MessageProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const addMessage = useCallback((content: string, type: AppMessageType, id: number | null = null) => {
+  const addMessage = useCallback((content: string, type: AppMessageType, id: number | null = null, autoPlay = false) => {
     const newMessage: Message = {
       id: id !== null ? id : messageIdCounter.current++,
       content,
       type,
+      autoPlay,
     };
     setMessages((prev) => [...prev, newMessage]);
     return newMessage;
@@ -53,7 +54,7 @@ export function MessageProvider({ children }: { children: React.ReactNode }) {
   const buildAgentPayload = useCallback((allMessages: Message[]) =>
     allMessages.filter((msg) => isAgentMessageType(msg.type)), [isAgentMessageType]);
 
-  const handleSendMessage = useCallback(async (message: string, synthSettings: SynthSettings) => {
+  const handleSendMessage = useCallback(async (message: string) => {
     if (!message) {
       showStatus('Please enter a message', 'error');
       return;
@@ -89,11 +90,8 @@ export function MessageProvider({ children }: { children: React.ReactNode }) {
       const aiMessage = data.output?.messages?.at(-1);
       const responseText = aiMessage?.content || '';
 
-      // Add AI response as a new message
-      addMessage(responseText, 'ai', messageIdCounter.current++);
-
-      // Speak the response
-      saySomething(responseText, synthSettings);
+      // Add AI response as a new message with autoPlay enabled
+      addMessage(responseText, 'ai', messageIdCounter.current++, true);
       showStatus('Response received', 'success');
     } catch (error) {
       console.error('Error:', error);
