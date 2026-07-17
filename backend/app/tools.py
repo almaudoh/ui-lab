@@ -27,7 +27,7 @@ def todays_date(timezone: str = "UTC"):
 def there_are_documents():
     """Check if there are any documents in the RAG system"""
     # We have to exclude the sample_document.md file, which is always present in the RAG system.
-    return len(uploader.get_all_documents()) > 1
+    return len(uploader.all_documents) > 1
 
 
 @tool
