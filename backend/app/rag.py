@@ -119,7 +119,7 @@ class RAGDocumentUploader:
         file_ext = file_path.suffix.lower()
 
         try:
-            if file_ext == ".txt":
+            if file_ext in [".txt", ".md"]:
                 loader = TextLoader(str(file_path), encoding="utf-8")
                 docs = loader.load()
             elif file_ext == ".pdf":
@@ -170,10 +170,11 @@ class RAGDocumentUploader:
                     self.all_documents, self.embeddings
                 )
             else:  # chroma (default)
+                self.vector_store_type = "chroma"
                 self.vector_store = build_chroma_vector_store(
                     self.all_documents, self.embeddings
                 )
-            print(f"✓ Vector store built with {len(self.all_documents)} documents")
+            print(f"✓ Vector store '{self.vector_store_type}' built with {len(self.all_documents)} documents")
         except Exception as e:
             print(f"✗ Error building vector store: {str(e)}")
             raise
@@ -247,6 +248,12 @@ class RAGDocumentUploader:
             print("⚠ Retrievers not built. Building now...")
             self.build_vector_store()
             self.build_bm25_retriever()
+
+        if not self.vector_store:
+            raise ValueError(
+                f"Could not get a vector store of type '{self.vector_store_type}' "
+                "ensure you have documents in the `/documents` folder"
+            )
 
         if retriever_type == "hybrid":
             vector_retriever = self.vector_store.as_retriever(search_kwargs={"k": 2})

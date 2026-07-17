@@ -1,3 +1,4 @@
+from datetime import datetime
 from app.rag import uploader
 from langchain.tools import tool
 
@@ -11,6 +12,23 @@ def calculator(expression: str):
     except Exception as e:
         return f"Error: {e}"
 
+@tool
+def todays_date(timezone: str = "UTC"):
+    """
+    Returns the current date and time for a given timezone
+    
+    timezone: str - a valid timezone string in uppercase characters
+    """
+    timezone = timezone.lower()
+    return datetime.now()
+
+
+@tool
+def there_are_documents():
+    """Check if there are any documents in the RAG system"""
+    # We have to exclude the sample_document.md file, which is always present in the RAG system.
+    return len(uploader.get_all_documents()) > 1
+
 
 @tool
 def search_notes(query: str):
@@ -21,4 +39,4 @@ def search_notes(query: str):
 
 
 def get_tools():
-    return [calculator, search_notes]
+    return [calculator, search_notes, todays_date, there_are_documents]

@@ -3,3 +3,4 @@
 
 # ...except for the .gitignore file itself.
 !.gitignore
+!sample_document.md
